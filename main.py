@@ -30,7 +30,7 @@ class DeliveryApp:
     def __init__(self, root):
         self.root = root
         self.root.title("🍕 Sistema de Delivery")
-        self.root.geometry("600x500")
+        self.root.geometry("600x550")  # Aumentei a altura para acomodar o botão de editar
         self.root.configure(bg="white")  # Fundo branco
 
         self.style = ttk.Style()
@@ -50,6 +50,7 @@ class DeliveryApp:
 
         self.clientes = []
         self.pedidos = []
+        self.pedido_selecionado_index = None  # Para rastrear o pedido selecionado para edição
 
         self.create_widgets()
 
@@ -107,7 +108,7 @@ class DeliveryApp:
 
     def create_pedido_tab(self):
         self.pedido_frame = ttk.Frame(self.notebook, style='TFrame')
-        self.notebook.add(self.pedido_frame, text='🍽️ Fazer Pedido')
+        self.notebook.add(self.pedido_frame, text='🍽️ Fazer/Editar Pedido')
 
         ttk.Label(self.pedido_frame, text="Cliente:", font=('Arial', 12, 'bold')).grid(row=0, column=0, padx=5, pady=5, sticky='w')
         self.cliente_combobox = ttk.Combobox(self.pedido_frame, values=[c[0] for c in self.clientes], state='readonly', font=('Arial', 12))
@@ -120,14 +121,41 @@ class DeliveryApp:
         fazer_pedido_button = ttk.Button(self.pedido_frame, text="Fazer Pedido", command=self.fazer_pedido, style='Accent.TButton')
         fazer_pedido_button.grid(row=2, column=0, columnspan=2, pady=10)
 
+        editar_pedido_button = ttk.Button(self.pedido_frame, text="Editar Pedido", command=self.editar_pedido, style='TButton')
+        editar_pedido_button.grid(row=3, column=0, columnspan=2, pady=10)
+
         self.pedidos_listbox = tk.Listbox(self.pedido_frame, height=5, width=40, font=('Arial', 10), bg="lightgray")
-        self.pedidos_listbox.grid(row=3, column=0, columnspan=2, padx=5, pady=5)
+        self.pedidos_listbox.grid(row=4, column=0, columnspan=2, padx=5, pady=5)
+        self.pedidos_listbox.bind('<<ListboxSelect>>', self.selecionar_pedido_para_editar)
+
+        salvar_edicao_button = ttk.Button(self.pedido_frame, text="Salvar Edição", command=self.salvar_edicao_pedido, style='Accent.TButton')
+        salvar_edicao_button.grid(row=5, column=0, columnspan=2, pady=10)
+        salvar_edicao_button.config(state=tk.DISABLED) # Desabilitado inicialmente
+        self.salvar_edicao_button = salvar_edicao_button
+
+        excluir_pedido_button = ttk.Button(self.pedido_frame, text="Excluir Pedido", command=self.excluir_pedido, style='TButton')
+        excluir_pedido_button.grid(row=6, column=0, columnspan=2, pady=10)
 
         self.pedido_frame.bind("<Visibility>", self.update_pedido_tab)
 
+    def editar_pedido(self):
+        """Habilita a edição do pedido selecionado."""
+        selecionado = self.pedidos_listbox.curselection()
+        if selecionado:
+            self.selecionar_pedido_para_editar(None) # Simula a seleção para preencher os campos
+        else:
+            messagebox.showinfo("Aviso", "Selecione um pedido na lista para editar.")
+
     def update_pedido_tab(self, event):
         self.cliente_combobox['values'] = [c[0] for c in self.clientes]
-        self.pizza_combobox['values'] = [p[0] for p in cardapio] # Atualiza as opções de pizza também
+        self.pizza_combobox['values'] = [p[0] for p in cardapio]
+        self.atualizar_lista_pedidos()
+        self.limpar_selecao_edicao()
+
+    def atualizar_lista_pedidos(self):
+        self.pedidos_listbox.delete(0, tk.END)
+        for pedido in self.pedidos:
+            self.pedidos_listbox.insert(tk.END, f"{pedido[0]} - {pedido[1]} (R${pedido[2]:.2f})")
 
     def fazer_pedido(self):
         if not self.clientes:
@@ -148,10 +176,65 @@ class DeliveryApp:
         if cliente_info and pizza_info:
             pedido = [cliente_info[0], pizza_info[0], pizza_info[2]]
             self.pedidos.append(pedido)
-            self.pedidos_listbox.insert(tk.END, f"{pedido[0]} - {pedido[1]} (R${pedido[2]:.2f})")
+            self.atualizar_lista_pedidos()
             messagebox.showinfo("Sucesso", f"Pedido de {pedido[1]} para {pedido[0]} adicionado!")
+            self.limpar_campos_pedido()
         else:
             messagebox.showerror("Erro", "Erro ao processar o pedido.")
+
+    def limpar_campos_pedido(self):
+        self.cliente_combobox.set('')
+        self.pizza_combobox.set('')
+
+    def selecionar_pedido_para_editar(self, event):
+        try:
+            self.pedido_selecionado_index = self.pedidos_listbox.curselection()[0]
+            pedido_selecionado = self.pedidos[self.pedido_selecionado_index]
+            self.cliente_combobox.set(pedido_selecionado[0])
+            self.pizza_combobox.set(pedido_selecionado[1])
+            self.salvar_edicao_button.config(state=tk.NORMAL)
+        except IndexError:
+            pass # Nenhum item selecionado
+
+    def salvar_edicao_pedido(self):
+        if self.pedido_selecionado_index is not None:
+            cliente_nome = self.cliente_combobox.get()
+            pizza_nome = self.pizza_combobox.get()
+
+            if not cliente_nome or not pizza_nome:
+                messagebox.showerror("Erro", "Selecione um cliente e uma pizza para salvar a edição.")
+                return
+
+            cliente_info = next((c for c in self.clientes if c[0] == cliente_nome), None)
+            pizza_info = next((p for p in cardapio if p[0] == pizza_nome), None)
+
+            if cliente_info and pizza_info:
+                self.pedidos[self.pedido_selecionado_index] = [cliente_info[0], pizza_info[0], pizza_info[2]]
+                self.atualizar_lista_pedidos()
+                messagebox.showinfo("Sucesso", "Pedido editado com sucesso!")
+                self.limpar_campos_pedido()
+                self.limpar_selecao_edicao()
+            else:
+                messagebox.showerror("Erro", "Erro ao salvar a edição do pedido.")
+        else:
+            messagebox.showerror("Erro", "Nenhum pedido selecionado para editar.")
+
+    def limpar_selecao_edicao(self):
+        self.pedidos_listbox.selection_clear(0, tk.END)
+        self.pedido_selecionado_index = None
+        self.salvar_edicao_button.config(state=tk.DISABLED)
+        self.limpar_campos_pedido()
+
+    def excluir_pedido(self):
+        selecionado = self.pedidos_listbox.curselection()
+        if selecionado:
+            index_excluir = selecionado[0]
+            pedido_excluido = self.pedidos.pop(index_excluir)
+            self.atualizar_lista_pedidos()
+            messagebox.showinfo("Sucesso", f"Pedido de {pedido_excluido[1]} para {pedido_excluido[0]} excluído!")
+            self.limpar_selecao_edicao()
+        else:
+            messagebox.showerror("Erro", "Selecione um pedido para excluir.")
 
     def create_resumo_tab(self):
         self.resumo_frame = ttk.Frame(self.notebook, style='TFrame')
