@@ -6,7 +6,18 @@ import time
 cardapio = [
     ["🍕 Margherita", "Tomate, Mussarela, Manjericão", 30.0],
     ["🍕 Calabresa", "Calabresa, Cebola, Mussarela", 35.0],
-    ["🍕 Quatro Queijos", "Mussarela, Parmesão, Provolone, Gorgonzola", 40.0]
+    ["🍕 Quatro Queijos", "Mussarela, Parmesão, Provolone, Gorgonzola", 40.0],
+    ["🍕 Portuguesa", "Presunto, Ovos, Cebola, Azeitona, Mussarela", 42.0],
+    ["🍕 Frango com Catupiry", "Frango Desfiado, Catupiry, Mussarela", 45.0],
+    ["🍕 Pepperoni", "Pepperoni, Mussarela", 38.0],
+    ["🍕 Napolitana", "Tomate, Mussarela, Alho, Orégano", 32.0],
+    ["🍕 Lombo Canadense", "Lombo Canadense, Cebola, Mussarela", 43.0],
+    ["🍕 Bacon com Milho", "Bacon, Milho, Mussarela", 37.0],
+    ["🍕 Palmito", "Palmito, Mussarela, Azeitona", 41.0],
+    ["🍕 Carne Seca com Catupiry", "Carne Seca Desfiada, Catupiry, Mussarela", 48.0],
+    ["🍕 Vegetariana", "Brócolis, Milho, Pimentão, Cebola, Mussarela", 39.0],
+    ["🍕 Doce de Banana com Canela", "Banana, Canela, Leite Condensado, Mussarela", 33.0],
+    ["🍕 Romeu e Julieta", "Goiabada, Queijo Minas", 36.0]
 ]
 
 # Lista de clientes [Nome, Endereço]
@@ -20,13 +31,22 @@ class DeliveryApp:
         self.root = root
         self.root.title("🍕 Sistema de Delivery")
         self.root.geometry("600x500")
-        self.root.configure(bg="#f8e1d4")  # Cor de fundo suave
+        self.root.configure(bg="white")  # Fundo branco
 
         self.style = ttk.Style()
-        self.style.theme_use('clam') 
-        self.style.configure('TNotebook', background="#f8e1d4", borderwidth=0)
-        self.style.configure('TNotebook.Tab', background="#ffcc00", padding=[10, 5])
-        self.style.map('TNotebook.Tab', background=[('selected', '#ff9900')], foreground=[('selected', 'white')])
+        self.style.theme_use('clam')
+        self.style.configure('TNotebook', background="white", borderwidth=0)
+        self.style.configure('TNotebook.Tab', background="lightgray", padding=[10, 5])
+        self.style.map('TNotebook.Tab', background=[('selected', 'white')], foreground=[('selected', 'black')])
+
+        self.style.configure('TLabel', background="white", foreground="black", font=('Arial', 12))
+        self.style.configure('TButton', background="lightgray", foreground="black", font=('Arial', 12, 'bold'))
+        self.style.map('TButton', background=[('active', 'gray')])
+        self.style.configure('Accent.TButton', background="gray", foreground="white", font=('Arial', 12, 'bold'))
+        self.style.map('Accent.TButton', background=[('active', 'darkgray')])
+
+        self.style.configure('TEntry', font=('Arial', 12))
+        self.style.configure('TCombobox', font=('Arial', 12))
 
         self.clientes = []
         self.pedidos = []
@@ -39,29 +59,28 @@ class DeliveryApp:
 
         self.create_cliente_tab()
         self.create_pedido_tab()
-        self.create_resumo_tab() 
+        self.create_resumo_tab()
         self.create_entrega_tab()  # Simular Entrega
 
     def create_cliente_tab(self):
-        self.cliente_frame = ttk.Frame(self.notebook)
+        self.cliente_frame = ttk.Frame(self.notebook, style='TFrame')
         self.notebook.add(self.cliente_frame, text='👤 Cadastrar Cliente')
 
-        ttk.Label(self.cliente_frame, text="Nome:", font=('Arial', 12, 'bold'), background="#f8e1d4").grid(row=0, column=0, padx=5, pady=5, sticky='w')
+        ttk.Label(self.cliente_frame, text="Nome:", font=('Arial', 12, 'bold')).grid(row=0, column=0, padx=5, pady=5, sticky='w')
         self.nome_entry = ttk.Entry(self.cliente_frame, width=30, font=('Arial', 12))
         self.nome_entry.grid(row=0, column=1, padx=5, pady=5, sticky='ew')
 
-        ttk.Label(self.cliente_frame, text="Endereço:", font=('Arial', 12, 'bold'), background="#f8e1d4").grid(row=1, column=0, padx=5, pady=5, sticky='w')
+        ttk.Label(self.cliente_frame, text="Endereço:", font=('Arial', 12, 'bold')).grid(row=1, column=0, padx=5, pady=5, sticky='w')
         self.endereco_entry = ttk.Entry(self.cliente_frame, width=30, font=('Arial', 12))
         self.endereco_entry.grid(row=1, column=1, padx=5, pady=5, sticky='ew')
 
         cadastrar_button = ttk.Button(self.cliente_frame, text="Cadastrar", command=self.cadastrar_cliente, style='Accent.TButton')
         cadastrar_button.grid(row=2, column=0, columnspan=2, pady=10)
-        self.style.configure('Accent.TButton', foreground='green', font=('Arial', 12, 'bold'))
 
-        excluir_button = ttk.Button(self.cliente_frame, text="Excluir Cliente", command=self.excluir_cliente, style='Accent.TButton')
+        excluir_button = ttk.Button(self.cliente_frame, text="Excluir Cliente", command=self.excluir_cliente, style='TButton')
         excluir_button.grid(row=3, column=0, columnspan=2, pady=10)
 
-        self.clientes_listbox = tk.Listbox(self.cliente_frame, height=5, width=40, font=('Arial', 10), bg="#fff3e6")
+        self.clientes_listbox = tk.Listbox(self.cliente_frame, height=5, width=40, font=('Arial', 10), bg="lightgray")
         self.clientes_listbox.grid(row=4, column=0, columnspan=2, padx=5, pady=5)
 
     def cadastrar_cliente(self):
@@ -87,27 +106,28 @@ class DeliveryApp:
             messagebox.showerror("Erro", "Selecione um cliente para excluir.")
 
     def create_pedido_tab(self):
-        self.pedido_frame = ttk.Frame(self.notebook)
+        self.pedido_frame = ttk.Frame(self.notebook, style='TFrame')
         self.notebook.add(self.pedido_frame, text='🍽️ Fazer Pedido')
 
-        ttk.Label(self.pedido_frame, text="Cliente:", font=('Arial', 12, 'bold'), background="#f8e1d4").grid(row=0, column=0, padx=5, pady=5, sticky='w')
+        ttk.Label(self.pedido_frame, text="Cliente:", font=('Arial', 12, 'bold')).grid(row=0, column=0, padx=5, pady=5, sticky='w')
         self.cliente_combobox = ttk.Combobox(self.pedido_frame, values=[c[0] for c in self.clientes], state='readonly', font=('Arial', 12))
         self.cliente_combobox.grid(row=0, column=1, padx=5, pady=5, sticky='ew')
 
-        ttk.Label(self.pedido_frame, text="Pizza:", font=('Arial', 12, 'bold'), background="#f8e1d4").grid(row=1, column=0, padx=5, pady=5, sticky='w')
+        ttk.Label(self.pedido_frame, text="Pizza:", font=('Arial', 12, 'bold')).grid(row=1, column=0, padx=5, pady=5, sticky='w')
         self.pizza_combobox = ttk.Combobox(self.pedido_frame, values=[p[0] for p in cardapio], state='readonly', font=('Arial', 12))
         self.pizza_combobox.grid(row=1, column=1, padx=5, pady=5, sticky='ew')
 
         fazer_pedido_button = ttk.Button(self.pedido_frame, text="Fazer Pedido", command=self.fazer_pedido, style='Accent.TButton')
         fazer_pedido_button.grid(row=2, column=0, columnspan=2, pady=10)
 
-        self.pedidos_listbox = tk.Listbox(self.pedido_frame, height=5, width=40, font=('Arial', 10), bg="#fff3e6")
+        self.pedidos_listbox = tk.Listbox(self.pedido_frame, height=5, width=40, font=('Arial', 10), bg="lightgray")
         self.pedidos_listbox.grid(row=3, column=0, columnspan=2, padx=5, pady=5)
 
         self.pedido_frame.bind("<Visibility>", self.update_pedido_tab)
 
     def update_pedido_tab(self, event):
         self.cliente_combobox['values'] = [c[0] for c in self.clientes]
+        self.pizza_combobox['values'] = [p[0] for p in cardapio] # Atualiza as opções de pizza também
 
     def fazer_pedido(self):
         if not self.clientes:
@@ -134,16 +154,16 @@ class DeliveryApp:
             messagebox.showerror("Erro", "Erro ao processar o pedido.")
 
     def create_resumo_tab(self):
-        self.resumo_frame = ttk.Frame(self.notebook)
+        self.resumo_frame = ttk.Frame(self.notebook, style='TFrame')
         self.notebook.add(self.resumo_frame, text='📊 Resumo')
 
-        self.resumo_label = ttk.Label(self.resumo_frame, text="Resumo dos Pedidos", font=('Arial', 14, 'bold'), background="#f8e1d4")
+        self.resumo_label = ttk.Label(self.resumo_frame, text="Resumo dos Pedidos", font=('Arial', 14, 'bold'))
         self.resumo_label.pack(pady=5)
 
-        self.valor_total_label = ttk.Label(self.resumo_frame, text="Valor Total: R$ 0.00", font=('Arial', 12), background="#f8e1d4")
+        self.valor_total_label = ttk.Label(self.resumo_frame, text="Valor Total: R$ 0.00", font=('Arial', 12))
         self.valor_total_label.pack(pady=10)
 
-        atualizar_button = ttk.Button(self.resumo_frame, text="Atualizar Resumo", command=self.atualizar_resumo, style='Accent.TButton')
+        atualizar_button = ttk.Button(self.resumo_frame, text="Atualizar Resumo", command=self.atualizar_resumo, style='TButton')
         atualizar_button.pack(pady=10)
 
     def atualizar_resumo(self):
@@ -151,15 +171,15 @@ class DeliveryApp:
         self.valor_total_label.config(text=f"Valor Total: R${valor_total:.2f}")
 
     def create_entrega_tab(self):
-        self.entrega_frame = ttk.Frame(self.notebook)
+        self.entrega_frame = ttk.Frame(self.notebook, style='TFrame')
         self.notebook.add(self.entrega_frame, text='📦 Simular Entrega')
 
-        self.pedido_entrega_label = ttk.Label(self.entrega_frame, text="Próximo Pedido:", font=('Arial', 12, 'bold'), background="#f8e1d4")
+        self.pedido_entrega_label = ttk.Label(self.entrega_frame, text="Próximo Pedido:", font=('Arial', 12, 'bold'))
         self.pedido_entrega_label.pack(pady=5)
-        self.pedido_info_label = ttk.Label(self.entrega_frame, text="Nenhum pedido na fila.", font=('Arial', 14, 'bold'), background="#f8e1d4")
+        self.pedido_info_label = ttk.Label(self.entrega_frame, text="Nenhum pedido na fila.", font=('Arial', 14, 'bold'))
         self.pedido_info_label.pack(pady=5)
 
-        self.status_label = ttk.Label(self.entrega_frame, text="", font=('Arial', 12), background="#f8e1d4")
+        self.status_label = ttk.Label(self.entrega_frame, text="", font=('Arial', 12))
         self.status_label.pack(pady=10)
 
         entregar_button = ttk.Button(self.entrega_frame, text="Simular Entrega", command=self.simular_entrega, style='Accent.TButton')
@@ -180,17 +200,21 @@ class DeliveryApp:
             messagebox.showinfo("Aviso", "Nenhum pedido na fila para entrega.")
             return
 
-        pedido = self.pedidos.pop(0)  # Remove o primeiro pedido da lista
-        self.status_label.config(text=f"Entregando: {pedido[1]} para {pedido[0]}...")
+        pedido = self.pedidos.pop(0)
+        self.update_entrega_tab(None) # Atualiza a exibição do próximo pedido
+        self.status_label.config(text=f"Entregando {pedido[1]} para {pedido[0]}...", foreground='orange')
+        self.root.update()
+        time.sleep(1)
 
-        # Simulando a entrega
-        for _ in range(3):
-            time.sleep(1)  # Simula o tempo de entrega
-            self.status_label.config(text="Entrega em andamento...")
+        progresso = ["🏁", "🏍️", "🏍️💨", "📦🏡", "✅"]
+        for etapa in progresso:
+            self.status_label.config(text=f"Entrega: {etapa}", foreground='green')
+            self.root.update()
+            time.sleep(1)
 
-        self.status_label.config(text=f"Entrega concluída para {pedido[0]}!")
         messagebox.showinfo("Entrega Concluída", f"Pedido de {pedido[1]} para {pedido[0]} foi entregue!")
         self.pedido_info_label.config(text="Nenhum pedido na fila.")
+        self.status_label.config(foreground='black') # Reseta a cor do texto
 
 if __name__ == "__main__":
     root = tk.Tk()
