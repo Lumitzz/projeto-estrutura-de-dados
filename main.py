@@ -272,7 +272,7 @@ class DeliveryApp:
 
     def update_entrega_tab(self, event):
         if self.pedidos:
-            pedido = self.pedidos[-1]
+            pedido = self.pedidos[0]
             self.pedido_info_label.config(text=f"{pedido[1]} para {pedido[0]}")
         else:
             self.pedido_info_label.config(text="Nenhum pedido na fila.")
@@ -283,7 +283,7 @@ class DeliveryApp:
             messagebox.showinfo("Aviso", "Nenhum pedido na fila para entrega.")
             return
 
-        pedido = self.pedidos.pop()
+        pedido = self.pedidos.pop(0)
         self.update_entrega_tab(None) # Atualiza a exibição do próximo pedido
         self.status_label.config(text=f"Entregando {pedido[1]} para {pedido[0]}...", foreground='orange')
         self.root.update()
