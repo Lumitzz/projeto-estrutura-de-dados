@@ -26,7 +26,7 @@ clientes = []
 pedidos = []
 
 # Configuração do tema
-sg.theme('LightGrey1')
+sg.theme('SystemDefault')
 sg.set_options(font=('Arial', 12))
 
 class DeliveryApp:
