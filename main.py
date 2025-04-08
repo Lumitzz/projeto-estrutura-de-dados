@@ -250,8 +250,11 @@ class DeliveryApp:
         atualizar_button.pack(pady=10)
 
     def atualizar_resumo(self):
-        valor_total = sum([p[2] for p in self.pedidos])  # Calcula o valor total dos pedidos
+        valor_total = sum([p[2] for p in self.pedidos])
+        
         self.valor_total_label.config(text=f"Valor Total: R${valor_total:.2f}")
+        resumo_pedidos = "\n".join([f"{pedido[0]} - {pedido[1]} (R${pedido[2]:.2f})" for pedido in self.pedidos])
+        self.resumo_label.config(text=f"Resumo dos Pedidos\n\n{resumo_pedidos}")
 
     def create_entrega_tab(self):
         self.entrega_frame = ttk.Frame(self.notebook, style='TFrame')
